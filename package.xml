@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>udp_receiver</name>
+  <version>0.0.1</version>
+  <description>Package for receiving data from network via UDP. Converts and publishes data as ROS msgs.</description>
+
+  <author email="marcus.freiherr_ebner_von_eschenbach@stud.tu-darmstadt.de">Marcus Ebner</author>
+  <maintainer email="marcus.freiherr_ebner_von_eschenbach@stud.tu-darmstadt.de">Marcus Ebner</maintainer>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
