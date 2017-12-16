@@ -6,8 +6,8 @@ from geometry_msgs.msg import PoseStamped
 
 SAMPLE_RATE = 100
 
-def talker(filename):
-    pub = rospy.Publisher('poseFromFile/PoseStamped', PoseStamped, queue_size=10)
+def talker(filename, topicName='PoseStamped'):
+    pub = rospy.Publisher('poseFromFile/'+topicName, PoseStamped, queue_size=10)
     rospy.init_node('posePublisher', anonymous=True)
     rate = rospy.Rate(SAMPLE_RATE)
     reader = csv.reader(open(filename))
@@ -29,7 +29,7 @@ def talker(filename):
         rate.sleep()
 
 if __name__ == '__main__':
-    if len(sys.argv) >  3 or len(sys.argv) < 2:
+    if len(sys.argv) >  4 or len(sys.argv) < 2:
         print 'Usage: ' + 'filename [sample rate]'
     elif len(sys.argv) == 2:
         try:
@@ -40,5 +40,11 @@ if __name__ == '__main__':
         try:
             SAMPLE_RATE = float(sys.argv[2])
             talker(sys.argv[1])
+        except rospy.ROSInterruptException:
+            pass
+    elif len(sys.argv) == 4:
+        try:
+            SAMPLE_RATE = float(sys.argv[2])
+            talker(sys.argv[1], sys.argv[3])
         except rospy.ROSInterruptException:
             pass
