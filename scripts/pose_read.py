@@ -30,7 +30,7 @@ def talker(filename, topicName='PoseStamped'):
 
 if __name__ == '__main__':
     if len(sys.argv) >  4 or len(sys.argv) < 2:
-        print 'Usage: ' + 'filename [sample rate]'
+        print 'Usage: ' + 'filename [sample rate] [topicName]'
     elif len(sys.argv) == 2:
         try:
             talker(sys.argv[1])
