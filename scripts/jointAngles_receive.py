@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import sys
 import socket
 import struct
 import rospy
@@ -13,8 +13,8 @@ SAMPLE_RATE = 100
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
-def talker():
-    pub = rospy.Publisher('jointAnglesFromUDP/JointPosition', JointPosition, queue_size=10)
+def talker(topicName='JointPosition'):
+    pub = rospy.Publisher('jointAnglesFromUDP/'+topicName, JointPosition, queue_size=10)
     rospy.init_node('jointPosPublisher', anonymous=True)
     rate = rospy.Rate(SAMPLE_RATE)
     #print("Beginning receive loop...")
@@ -38,7 +38,18 @@ def talker():
         rate.sleep()
 
 if __name__ == '__main__':
-    try:
-        talker()
-    except rospy.ROSInterruptException:
-        pass
+#    try:
+#        talker()
+#    except rospy.ROSInterruptException:
+#        pass
+
+    if len(sys.argv) == 2:
+        try:
+            talker(sys.argv[1])
+        except rospy.ROSInterruptException:
+            pass
+    else:
+        try:
+            talker()
+        except rospy.ROSInterruptException:
+            pass
