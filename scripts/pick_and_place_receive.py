@@ -17,11 +17,14 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
 def uncouple_client(uncouple_req):
-  rospy.wait_for_service('coupler')
+  print "1"
+  #rospy.wait_for_service('coupler')
+  print "2"
   try:
-    uncouple = rospy.ospy.ServiceProxy('coupler', Coupler)
+    uncouple = rospy.ServiceProxy('coupler', Coupler)
     response = uncouple(uncouple_req)
-  except ospy.ServiceException, e:
+    print "Uncouple"
+  except rospy.ServiceException, e:
     print "Service call failed: %s"%e
 
 def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperCommandTopicName='GripperCommand'):
@@ -30,6 +33,7 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
     gripper_command_pub = rospy.Publisher('gripperCommandFromUDP/'+gripperCommandTopicName, Float64, queue_size=10)
     rospy.init_node('mcsPublisher', anonymous=True)
     rate = rospy.Rate(SAMPLE_RATE)
+    last_value = 0
     while not rospy.is_shutdown():
         data, addr = sock.recvfrom(128) # buffer size is (7+7+1+1)*8 bytes
         values = struct.unpack('<dddddddddddddddd', data)
@@ -59,16 +63,18 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
         gripper_command = Float64()
         gripper_command.data = values[14]
 
-        if value[15]==1 and last_value==0:
-          uncouple_client(true)  
-        elif value[15]==0 and last_value==1:
-          uncouple_client(false)
+        if values[15]==1 and last_value==0:
+          uncouple_client(True)  
+        elif values[15]==0 and last_value==1:
+          uncouple_client(False)
 
-        last_value = value[15]
+        last_value = values[15]
 
         pose_pub.publish(pose)
         joint_pub.publish(joints)
         gripper_command_pub.publish(gripper_command)
+
+        #print "Test"
         rate.sleep()
 
 if __name__ == '__main__':
