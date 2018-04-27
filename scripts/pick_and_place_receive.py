@@ -8,17 +8,17 @@ from iiwa_msgs.msg import JointPosition
 from std_msgs.msg import Float64
 
 #Parameters - TODO make them CLI/ROS-Parameters
-UDP_IP = "192.168.16.86"
+UDP_IP = "212.212.21.2"
 UDP_PORT = 22223
 SAMPLE_RATE = 100
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
-def talker(poseTopicName='PoseStamped', jointTopicName='JointAngles', gripperCommandTopicName='GripperCommand'):
-    pose_pub = rospy.Publisher('poseFromUDP/'+topicName, PoseStamped, queue_size=10)
-    joint_pub = rospy.Publisher('jointAnglesFromUDP/'+topicName, JointPosition, queue_size=10)
-    gripper_command_pub = rospy.Publisher('gripperCommandFromUDP/'+topicName, Float64, queue_size=10)
+def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperCommandTopicName='GripperCommand'):
+    pose_pub = rospy.Publisher('poseFromUDP/'+poseTopicName, PoseStamped, queue_size=10)
+    joint_pub = rospy.Publisher('jointAnglesFromUDP/'+jointTopicName, JointPosition, queue_size=10)
+    gripper_command_pub = rospy.Publisher('gripperCommandFromUDP/'+gripperCommandTopicName, Float64, queue_size=10)
     rospy.init_node('mcsPublisher', anonymous=True)
     rate = rospy.Rate(SAMPLE_RATE)
     while not rospy.is_shutdown():
@@ -26,7 +26,7 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointAngles', gripperCom
         values = struct.unpack('<ddddddddddddddd', data)
         #rospy.loginfo(value)
         pose = PoseStamped()
-        pose.header.frame_id = "/world"
+        pose.header.frame_id = "/operator"
         pose.header.stamp = rospy.Time.now()
         pose.pose.position.x = values[0]
         pose.pose.position.y = values[1]
@@ -37,7 +37,7 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointAngles', gripperCom
         pose.pose.orientation.w = values[6]
 
         joints = JointPosition()
-        joints.header.frame_id = "/world"
+        joints.header.frame_id = "/base_link"
         joints.header.stamp = rospy.Time.now()
         joints.position.a1 = values[7]
         joints.position.a2 = values[8]

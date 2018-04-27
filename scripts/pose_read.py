@@ -16,7 +16,7 @@ def talker(filename, topicName='PoseStamped'):
         values = [float(x) for x in line]
         #rospy.loginfo(values)
         pose = PoseStamped()
-        pose.header.frame_id = "/world"
+        pose.header.frame_id = "/operator"
         pose.header.stamp = rospy.Time.now()
         pose.pose.position.x = values[0]
         pose.pose.position.y = values[1]
