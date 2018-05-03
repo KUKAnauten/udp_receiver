@@ -7,11 +7,13 @@ from geometry_msgs.msg import PoseStamped
 from iiwa_msgs.msg import JointPosition
 from std_msgs.msg import Float64
 from joint_follower.srv import *
+import time
 
 #Parameters - TODO make them CLI/ROS-Parameters
 UDP_IP = "212.212.21.2"
 UDP_PORT = 22223
-SAMPLE_RATE = 100
+#SAMPLE_RATE = 100
+SAMPLE_RATE = 500
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
@@ -29,10 +31,11 @@ def uncouple_client(uncouple_req, service_handle):
   except rospy.ServiceException, e:
     print "Service call failed: %s"%e
 
-def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperCommandTopicName='GripperCommand'):
-    pose_pub = rospy.Publisher('poseFromUDP/'+poseTopicName, PoseStamped, queue_size=10)
-    joint_pub = rospy.Publisher('jointAnglesFromUDP/'+jointTopicName, JointPosition, queue_size=10)
-    gripper_command_pub = rospy.Publisher('gripperCommandFromUDP/'+gripperCommandTopicName, Float64, queue_size=10)
+def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperCommandTopicName='GripperCommand', uncouplingCommandTopicName='UncouplingCommand'):
+    pose_pub = rospy.Publisher('poseFromUDP/'+poseTopicName, PoseStamped, queue_size=1) # default queue_size = 10
+    joint_pub = rospy.Publisher('jointAnglesFromUDP/'+jointTopicName, JointPosition, queue_size=1)
+    gripper_command_pub = rospy.Publisher('gripperCommandFromUDP/'+gripperCommandTopicName, Float64, queue_size=1)
+    uncoupling_command_pub = rospy.Publisher('uncouplingCommandFromUDP/'+uncouplingCommandTopicName, Float64, queue_size=1)
     rospy.init_node('mcsPublisher', anonymous=True)
     
     rospy.wait_for_service('coupler')
@@ -40,8 +43,10 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
 
     rate = rospy.Rate(SAMPLE_RATE)
     last_value = 0
+    last_time = time.time()
     while not rospy.is_shutdown():
-        data, addr = sock.recvfrom(128) # buffer size is (7+7+1+1)*8 bytes
+        #data, addr = sock.recvfrom(128) # buffer size is (7+7+1+1)*8 bytes
+        data, addr = sock.recvfrom(128, socket.MSG_WAITALL) # buffer size is (7+7+1+1)*8 bytes
         values = struct.unpack('<dddddddddddddddd', data)
         #rospy.loginfo(value)         
         pose = PoseStamped()
@@ -69,6 +74,9 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
         gripper_command = Float64()
         gripper_command.data = values[14]
 
+        uncoupling_command = Float64()
+        uncoupling_command.data = values[15]
+
         if values[15]==1 and last_value==0:
           uncouple_client(True, uncouple)  
         elif values[15]==0 and last_value==1:
@@ -79,8 +87,12 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
         pose_pub.publish(pose)
         joint_pub.publish(joints)
         gripper_command_pub.publish(gripper_command)
+        uncoupling_command_pub.publish(uncoupling_command)
 
-        #print "Test"
+        now = time.time()
+        delta_time = now - last_time
+        print delta_time
+        last_time = now
         rate.sleep()
 
 if __name__ == '__main__':
