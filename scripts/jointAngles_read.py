@@ -2,6 +2,7 @@
 import sys
 import csv
 import rospy
+import time
 from iiwa_msgs.msg import JointPosition
 
 SAMPLE_RATE = 100
@@ -9,6 +10,7 @@ SAMPLE_RATE = 100
 def talker(filename, topicName='JointPosition'):
     pub = rospy.Publisher('jointAnglesFromFile/'+topicName, JointPosition, queue_size=10)
     rospy.init_node('jointPosPublisher', anonymous=True)
+    time.sleep(0.5)
     rate = rospy.Rate(SAMPLE_RATE)
     reader = csv.reader(open(filename))
     

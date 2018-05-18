@@ -44,6 +44,7 @@ def talker(poseTopicName='PoseStamped', jointTopicName='JointPosition', gripperC
     rate = rospy.Rate(SAMPLE_RATE)
     last_value = 0
     last_time = time.time()
+    time.sleep(0.5)
     while not rospy.is_shutdown():
         #data, addr = sock.recvfrom(128) # buffer size is (7+7+1+1)*8 bytes
         data, addr = sock.recvfrom(128, socket.MSG_WAITALL) # buffer size is (7+7+1+1)*8 bytes

@@ -2,19 +2,32 @@
 import sys
 import csv
 import rospy
+import time
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Time 
 
 SAMPLE_RATE = 100
 
 def talker(filename, topicName='PoseStamped'):
-    pub = rospy.Publisher('poseFromFile/'+topicName, PoseStamped, queue_size=10)
+    pub = rospy.Publisher('poseFromFile/'+topicName, PoseStamped, queue_size=1)
+    time_pub = rospy.Publisher('poseFromFile/receiveTime', Time, queue_size=1)
+    #rosTime_pub = rospy.Publisher('poseFromFile/receiveRosTime', Time, queue_size=1)
     rospy.init_node('posePublisher', anonymous=True)
+    # Without delay the first few values could not be received by the subscriber despite it had been 
+    # already registered. Apparently it takes some time until the connection is established after the 
+    # publisher (node) is created.
+    time.sleep(0.5) 
     rate = rospy.Rate(SAMPLE_RATE)
     reader = csv.reader(open(filename))
+
     for line in reader:
         if rospy.is_shutdown(): break
         values = [float(x) for x in line]
         #rospy.loginfo(values)
+        receiveTime = Time()
+        #receiveRosTime = Time()
+        receiveTime.data = rospy.Time.from_sec(time.time())
+        #receiveRosTime.data = rospy.Time.now()
         pose = PoseStamped()
         pose.header.frame_id = "/operator"
         pose.header.stamp = rospy.Time.now()
@@ -26,6 +39,8 @@ def talker(filename, topicName='PoseStamped'):
         pose.pose.orientation.z = values[5]
         pose.pose.orientation.w = values[6]
         pub.publish(pose)
+        time_pub.publish(receiveTime)
+        #rosTime_pub.publish(receiveRosTime)
         rate.sleep()
 
 if __name__ == '__main__':
