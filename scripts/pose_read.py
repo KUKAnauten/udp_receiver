@@ -9,8 +9,8 @@ from std_msgs.msg import Time
 SAMPLE_RATE = 100
 
 def talker(filename, topicName='PoseStamped'):
-    pub = rospy.Publisher('poseFromFile/'+topicName, PoseStamped, queue_size=1)
-    time_pub = rospy.Publisher('poseFromFile/receiveTime', Time, queue_size=1)
+    pub = rospy.Publisher('iiwa/poseFromFile/'+topicName, PoseStamped, queue_size=1)
+    time_pub = rospy.Publisher('iiwa/poseFromFile/receiveTime', Time, queue_size=1)
     #rosTime_pub = rospy.Publisher('poseFromFile/receiveRosTime', Time, queue_size=1)
     rospy.init_node('posePublisher', anonymous=True)
     # Without delay the first few values could not be received by the subscriber despite it had been 
