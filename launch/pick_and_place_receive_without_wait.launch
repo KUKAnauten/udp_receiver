@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    
+  <arg name="robot_name" default="iiwa"/>
+  <!-- Model of the iiwa to use : iiwa7, iiwa14 -->
+  <arg name="model" default="iiwa14"/>
+  <arg name="debug" default="false"/>
+
+  <group ns="$(arg robot_name)" unless="$(arg debug)">
+    <node name="pick_and_place_receive" pkg="udp_receiver" type="pick_and_place_receive_without_wait.py" respawn="false" output="screen">
+    </node>
+  </group>
+
+</launch>
